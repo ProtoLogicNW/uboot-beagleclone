@@ -35,15 +35,32 @@
 #include "../../../drivers/video/da8xx-fb.h"
 #include <bmp_layout.h>
 
+#define GPIO_TO_PIN(bank, gpio) (32 * (bank) + (gpio))
 
 DECLARE_GLOBAL_DATA_PTR;
-
-/* GPIO that controls power to DDR on EVM-SK */
-#define GPIO_DDR_VTT_EN		7
 
 static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 
 static int board_video_init(void);
+
+#define GPIO_TFT_SDI		GPIO_TO_PIN(1,4) 	/* gpio1_4, gpmc_ad4 */
+#define GPIO_TFT_SCK		GPIO_TO_PIN(1,5) 	/* gpio1_5, gpmc_ad5 */
+#define GPIO_TFT_CS			GPIO_TO_PIN(1,28)	/* gpio1_28, mcasp0_ahclkr */
+
+#define GPIO_LED_BLUE		GPIO_TO_PIN(2,2)
+#define GPIO_LED_ORANGE		GPIO_TO_PIN(2,3)
+#define GPIO_LED_GREEN		GPIO_TO_PIN(2,4)
+
+static int set_gpio(int gpio, int state)
+{
+	gpio_request(gpio, "temp");
+	gpio_direction_output(gpio, state);
+	gpio_set_value(gpio, state);
+	gpio_free(gpio);
+	return 0;
+}
+
+
 
 #if 0
 static int read_eeprom()
@@ -237,28 +254,26 @@ const struct dpll_params dpll_ddr_bone_black = {
 
 void am33xx_spl_board_init(void)
 {
-	//struct am335x_baseboard_id header;
-	int mpu_vdd;
-
-	//enable_i2c0_pin_mux();
-	//if (read_eeprom(&header) < 0)
-	puts("BoneLogic booting....\n");
-
-	/* Get the frequency */
-	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
-
-#if 1 /* BoneLogic... based on BeagleBone*/
-	int usb_cur_lim;
-
-	//TODO: original source returned here for BB rev A1, suggesting that PMIC shouldn't be init'd on this rev...
-	//make sure that this doesn't apply to us.
-	puts("CV TODO: fixup  spl_board_init!\n");
-		return;
-#if 0
+	puts("BONELOGIC R1\nPROTOLOGIC, 2014\n================\n");
+/*	enable_i2c0_pin_mux();
 	if (i2c_probe(TPS65217_CHIP_PM))
+	{
+		puts("PMIC i2c probe failed!\n");
 		return;
+	}
+*/	
+	/* Get the max CPU frequency & set it... */
+	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
+	//dpll_mpu_opp100.m = MPUPLL_M_300;
+	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 
-	//check for AC power...
+	//set CORE to opp100
+	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
+
+	puts("OPP100 set.\n");
+	return;
+
+#if 0 /* old stuff */	
 	uchar pmic_status_reg;
 	if (tps65217_reg_read(TPS65217_STATUS,&pmic_status_reg))
 		return;
@@ -269,8 +284,7 @@ void am33xx_spl_board_init(void)
 	}
 	
 	//FYI setting PLL for 1GHz (BBB)
-	//dpll_mpu_opp100.m = MPUPLL_M_1000;
-
+	dpll_mpu_opp100.m = MPUPLL_M_1000;
 	usb_cur_lim = TPS65217_USB_INPUT_CUR_LIMIT_1300MA;
 	mpu_vdd = TPS65217_DCDC_VOLT_SEL_1275MV;
 
@@ -302,10 +316,8 @@ void am33xx_spl_board_init(void)
 
 	if (tps65217_reg_write(TPS65217_PROT_LEVEL_2,TPS65217_DEFLS2,TPS65217_LDO_VOLTAGE_OUT_3_3,TPS65217_LDO_MASK))
 			puts("tps65217_reg_write failure\n");
-#endif
 
-#else
-//EVM-SK
+EVM-SK FLOW
 	int sil_rev;
 	/*
 	 * The GP EVM, IDK and EVM SK use a TPS65910 PMIC.  For all
@@ -336,11 +348,7 @@ void am33xx_spl_board_init(void)
 
 	/* Set CORE Frequencies to OPP100 */
 	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
-
 #endif
-
-	/* Set MPU Frequency to what we detected now that voltages are set */
-	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 }
 
 const struct dpll_params *get_dpll_ddr_params(void)	
@@ -353,9 +361,9 @@ const struct dpll_params *get_dpll_ddr_params(void)
 	return &dpll_ddr;
 }
 
+//Called from SPL...
 void set_mux_conf_regs(void)
 {
-
 	enable_board_pin_mux(); //mux.c
 }
 
@@ -417,8 +425,13 @@ int board_init(void)
 	hw_watchdog_init();
 #endif
 
-	board_video_init();
+	//led init
+	printf("Setting status LEDs...\n");
+	set_gpio(GPIO_LED_BLUE, 1);
+	set_gpio(GPIO_LED_ORANGE, 1);
+	set_gpio(GPIO_LED_GREEN, 1);
 
+	board_video_init();
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
 #if defined(CONFIG_NOR) || defined(CONFIG_NAND)
@@ -604,15 +617,15 @@ static struct da8xx_panel lcd_panels[] = {
 	/* NORSE TFT */
 	[1] = {
 		.name = "NORSE_TFT",
-		.width = 400,
-		.height = 240,
-		.hfp = 52,
-		.hbp = 84,
-		.hsw = 36,
-		.vfp = 3,
-		.vbp = 14,
-		.vsw = 6,
-		.pxl_clk = 6000000,
+		.width = 240,
+		.height = 400,
+		.hfp = 8,
+		.hbp = 8,
+		.hsw = 16,
+		.vfp = 4,
+		.vbp = 4,
+		.vsw = 8,
+		.pxl_clk = 8000000,
 		.invert_pxl_clk = 0,
 	},
 };
@@ -640,15 +653,6 @@ static const struct lcd_ctrl_config lcd_cfg = {
 	.sync_ctrl		= 1,
 	.raster_order		= 0,
 };
-
-static int set_gpio(int gpio, int state)
-{
-	gpio_request(gpio, "temp");
-	gpio_direction_output(gpio, state);
-	gpio_set_value(gpio, state);
-	gpio_free(gpio);
-	return 0;
-}
 
 static int enable_backlight(void)
 {
@@ -738,10 +742,85 @@ static int conf_disp_pll(int m, int n)
 	return 0;
 }
 
+static void hx8352_bitbang(uchar data)
+{
+	int i;
+	// send bits 7..0
+	for (i = 0; i < 8; i++)
+   	{
+		// consider leftmost bit
+		// set line high if bit is 1, low if bit is 0
+		if (data & 0x80)
+			set_gpio(GPIO_TFT_SDI,1);
+		else
+			set_gpio(GPIO_TFT_SDI,0);
+
+		set_gpio(GPIO_TFT_SCK,0);
+		udelay(1);
+		set_gpio(GPIO_TFT_SCK,1);
+		udelay(1);
+
+		// shift byte left so next bit will be leftmost
+		data <<= 1;
+	}
+
+}
+
+static void hx8352_setReg(uchar reg, uchar val)
+{
+ 	set_gpio(GPIO_TFT_CS,0);
+ 	udelay(1);
+ 	hx8352_bitbang(0x74);
+ 	hx8352_bitbang(reg);
+ 	udelay(1);
+ 	set_gpio(GPIO_TFT_CS,1);
+
+ 	set_gpio(GPIO_TFT_CS,0);
+ 	udelay(1);
+ 	hx8352_bitbang(0x76);
+ 	hx8352_bitbang(val);
+ 	udelay(1);
+ 	set_gpio(GPIO_TFT_CS,1);
+ 	udelay(100);
+}
+
 static int board_video_init(void)
 {
+	//set all serial signals to known state
+	set_gpio(GPIO_TFT_CS,1);
+	set_gpio(GPIO_TFT_SDI,1);
+	set_gpio(GPIO_TFT_SCK,1);
+
+	udelay(50000);
+
+	hx8352_setReg(0x28, 0x3c); //GON etc
+	hx8352_setReg(0x1f, 0x7c); //power-on
+	hx8352_setReg(0x31, 0x02); //rgb mode 1
+	hx8352_setReg(0x36, 0x03); 
+	hx8352_setReg(0x40, 0x00); 
+	hx8352_setReg(0x41, 0x45); 
+	hx8352_setReg(0x42, 0x45); 
+	hx8352_setReg(0x44, 0x00); 
+	hx8352_setReg(0x45, 0x08); 
+	hx8352_setReg(0x46, 0x23); 
+	hx8352_setReg(0x47, 0x23); 
+	hx8352_setReg(0x48, 0x23);  //need to check
+	hx8352_setReg(0x49, 0x40);  
+	hx8352_setReg(0x4A, 0x04); 
+	hx8352_setReg(0x4B, 0x00); 
+	hx8352_setReg(0x4C, 0x88); 
+	hx8352_setReg(0x4D, 0x88); 
+	hx8352_setReg(0x4E, 0x88); 
+	hx8352_setReg(0x02, 0x00); 
+	hx8352_setReg(0x03, 0x00); 
+	hx8352_setReg(0x04, 0x00); 
+	hx8352_setReg(0x05, 0xF0); 
+	hx8352_setReg(0x06, 0x00); 
+	hx8352_setReg(0x07, 0x00); 
+	hx8352_setReg(0x08, 0x01); 
+
 	//conf_disp_pll(24, 1);
-	//da8xx_video_init(&lcd_panels[0], &lcd_cfg, lcd_cfg.bpp);
+	//da8xx_video_init(&lcd_panels[1], &lcd_cfg, lcd_cfg.bpp);
 
 	//enable_pwm();
 	//enable_backlight();

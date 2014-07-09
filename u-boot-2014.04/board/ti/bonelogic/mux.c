@@ -1,16 +1,8 @@
 /*
- * mux.c
+ * BoneLogic mux.c
  *
- * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation version 2.
- *
- * This program is distributed "as is" WITHOUT ANY WARRANTY of any
- * kind, whether express or implied; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Big FAT hint: See arch/arm/include/asm/arch-am33xx/mux_am33xx.h for pin-names!
  */
 
 #include <common.h>
@@ -20,6 +12,13 @@
 #include <asm/io.h>
 #include <i2c.h>
 #include "board.h"
+
+static struct module_pin_mux led_pin_mux[] = {
+	{OFFSET(gpmc_advn_ale), MODE(7)},	/* LED USR2 (blue), gpio2_2 */
+	{OFFSET(gpmc_oen_ren), MODE(7)},	/* LED USR1 (orange), gpio2_3 */
+	{OFFSET(gpmc_wen), MODE(7)},	/* LED USR0 (green), gpio2_4 */
+	{-1},
+};
 
 static struct module_pin_mux uart0_pin_mux[] = {
 	{OFFSET(uart0_rxd), (MODE(0) | PULLUP_EN | RXACTIVE)},	/* UART0_RXD */
@@ -124,7 +123,14 @@ static struct module_pin_mux spi0_pin_mux[] = {
 	{OFFSET(spi0_d0), (MODE(0) | RXACTIVE |	PULLUDEN | PULLUP_EN)},			/* SPI0_D0 */
 	{OFFSET(spi0_d1), (MODE(0) | RXACTIVE | PULLUDEN)},	/* SPI0_D1 */
 	{OFFSET(spi0_cs0), (MODE(0) | RXACTIVE |PULLUDEN | PULLUP_EN)},			/* SPI0_CS0 */
-//	{OFFSET(spi0_cs1), (MODE(0) | RXACTIVE |PULLUDEN | PULLUP_EN)},			/* SPI0_CS1 */
+	{-1},
+};
+
+static struct module_pin_mux spi1_pin_mux[] = {
+	{OFFSET(mcasp0_aclkx), (MODE(3) | RXACTIVE | PULLUDEN)}, 		//SPI1 CLK, GPIO3_14
+	{OFFSET(mcasp0_fsx), (MODE(3) | RXACTIVE |	PULLUDEN | PULLUP_EN)}, //SPI_D0, GPIO3_15
+	{OFFSET(mcasp0_axr0), (MODE(3) | RXACTIVE | PULLUDEN)}, 			//SPI_D1, GPIO3_16
+	{OFFSET(mcasp0_ahclkr), (MODE(3) | RXACTIVE |PULLUDEN | PULLUP_EN)}, //SPI_CS, GPIO3_17
 	{-1},
 };
 
@@ -199,7 +205,9 @@ static struct module_pin_mux lcdc_pin_mux[] = {
 	{OFFSET(lcd_hsync), (MODE(0))},		/* LCD_HSYNC */
 	{OFFSET(lcd_pclk), (MODE(0))},		/* LCD_PCLK */
 	{OFFSET(lcd_ac_bias_en), (MODE(0))},	/* LCD_AC_BIAS_EN */
-	{OFFSET(mcasp0_ahclkr), (MODE(7))},	/* backlight enable */
+	{OFFSET(mcasp0_ahclkr), (MODE(7))},	/* TFT CS, gpio 1_28 */
+	{OFFSET(gpmc_ad4), (MODE(7))},	/* TFT SDI, gpio 1_4 */
+	{OFFSET(gpmc_ad5), (MODE(7))},	/* TFT SCLK, gpio 1_5 */
 	{-1},
 };
 
@@ -208,46 +216,19 @@ void enable_uart0_pin_mux(void)
 	configure_module_pin_mux(uart0_pin_mux);
 }
 
-void enable_uart1_pin_mux(void)
-{
-	configure_module_pin_mux(uart1_pin_mux);
-}
-
-void enable_uart2_pin_mux(void)
-{
-	configure_module_pin_mux(uart2_pin_mux);
-}
-
-void enable_uart3_pin_mux(void)
-{
-	configure_module_pin_mux(uart3_pin_mux);
-}
-
-void enable_uart4_pin_mux(void)
-{
-	configure_module_pin_mux(uart4_pin_mux);
-}
-
-void enable_uart5_pin_mux(void)
-{
-	configure_module_pin_mux(uart5_pin_mux);
-}
-
 void enable_i2c0_pin_mux(void)
 {
 	configure_module_pin_mux(i2c0_pin_mux);
 }
 
-
 void enable_board_pin_mux()
 {
-	puts("Mux'in for BoneLogicR1, bitches!\n");
 	configure_module_pin_mux(lcdc_pin_mux);
-//	configure_module_pin_mux(i2c1_pin_mux);
-//	configure_module_pin_mux(gpio0_7_pin_mux);
-//	configure_module_pin_mux(rgmii1_pin_mux);
-//	configure_module_pin_mux(mmc0_pin_mux_sk_evm);
 	configure_module_pin_mux(spi0_pin_mux);
+	configure_module_pin_mux(spi1_pin_mux);
 	configure_module_pin_mux(uart0_pin_mux);
+	configure_module_pin_mux(led_pin_mux);
+	puts("\nMux'ed for BoneLogicR1, bitches!\n");
 	//hang();
 }
+

@@ -27,16 +27,23 @@
 #define CONFIG_ENV_SIZE			(32 << 10)
 
 /* Enhance our eMMC support / experience. */
-//#define CONFIG_CMD_GPT
-//#define CONFIG_EFI_PARTITION
-//#define CONFIG_PARTITION_UUIDS
-//#define CONFIG_CMD_PART
+#if 0
+#define CONFIG_CMD_GPT
+#define CONFIG_EFI_PARTITION
+#define CONFIG_PARTITION_UUIDS
+#define CONFIG_CMD_PART
+#endif
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 
 #ifndef CONFIG_SPL_BUILD
 
-#define CONFIG_VIDEO
+
+//Backlight PWM ... remove this
+#define PWM_TICKS	0x1388
+#define PWM_DUTY	0x200
+
+/*#define CONFIG_VIDEO*/
 #if defined(CONFIG_VIDEO)
 #define CONFIG_VIDEO_DA8XX
 #define CONFIG_CFB_CONSOLE
@@ -48,8 +55,6 @@
 #define CONFIG_VIDEO_BMP_LOGO
 #define CONFIG_CMD_BMP
 #define DA8XX_LCD_CNTL_BASE	LCD_CNTL_BASE
-#define PWM_TICKS	0x1388
-#define PWM_DUTY	0x200
 #define CONFIG_SYS_CONSOLE_BG_COL	0xff
 #define CONFIG_SYS_CONSOLE_FG_COL	0x00
 #endif
@@ -100,14 +105,15 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 	"z5=0x37FFFF\0"\
 	"s6=0x480000\0"\
 	"z6=0xB7FFFF\0"\
-	"console=ttyO0,115200n8\0" \
 	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
 	"loadaddr=0x80200000\0" \
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
 	"loaddtb=sf read 0x815f0000 ${s3} ${z3};\0" \
 	"loadrootfs=sf read 0x82000000 ${s6} ${z6};\0" \
-	"bootargs=console=${console} root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs ${bootdbg}\0"\
-	"bootlogic=sf probe 0;run loadimage;run loaddtb; run loadrootfs; bootz 0x80300000 - 0x815f0000;\0"\
+	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200\0"\
+	"bootargs_normal=console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200\0"\
+	"boot_recovery=sf probe 0;run loadimage;run loaddtb; run loadrootfs; setenv bootargs ${bootargs_recovery}; bootz 0x80300000 - 0x815f0000;\0"\
+	"boot_normal=sf probe 0;run loadimage;run loaddtb; setenv bootargs ${bootargs_normal}; bootz 0x80300000 - 0x815f0000;\0"\
 	"updateprep=mmc dev 0; mmc rescan; sf probe 0;\0"\
 	"updtboot=run updateprep;fatload mmc 0 ${loadaddr} MLO.byteswap;sf update ${loadaddr} ${s1} ${filesize};fatload mmc 0 ${loadaddr} u-boot.img; sf update ${loadaddr} ${s2} ${filesize};\0"\
 	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} am335x-bonelogic.dtb; sf update ${loadaddr} ${s3} ${filesize};\0"\
@@ -136,7 +142,7 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 #endif
 #endif
 
-#define CONFIG_BOOTCOMMAND  "run bootlogic;" 
+#define CONFIG_BOOTCOMMAND  "run boot_normal;" 
 
 /* NS16550 Configuration */
 #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
@@ -170,9 +176,11 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 #define CONFIG_SPL_MUSB_NEW_SUPPORT
 
 /* General network SPL, both CPSW and USB gadget RNDIS */
-//#define CONFIG_SPL_NET_SUPPORT
-//#define CONFIG_SPL_ENV_SUPPORT
-//#define CONFIG_SPL_NET_VCI_STRING	"BoneLogic U-Boot SPL"
+#if 0
+#define CONFIG_SPL_NET_SUPPORT
+#define CONFIG_SPL_ENV_SUPPORT
+#define CONFIG_SPL_NET_VCI_STRING	"BoneLogic U-Boot SPL"
+#endif
 
 /* SPI flash. */
 #define CONFIG_SPL_SPI_SUPPORT
@@ -329,8 +337,10 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 #define CONFIG_SF_DEFAULT_SPEED		24000000
 
 /* Network. */
-//#define CONFIG_PHY_GIGE
-//#define CONFIG_PHYLIB
-//#define CONFIG_PHY_SMSC
+#if 0
+#define CONFIG_PHY_GIGE
+#define CONFIG_PHYLIB
+#define CONFIG_PHY_SMSC
+#endif
 
 #endif	/* ! __CONFIG_AM335X_BONELOGIC_H */

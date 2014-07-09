@@ -12,26 +12,12 @@
 #define _BOARD_H_
 
 /*
- * TI AM335x parts define a system EEPROM that defines certain sub-fields.
- * We use these fields to in turn see what board we are on, and what
- * that might require us to set or not set.
- */
-#define HDR_NO_OF_MAC_ADDR	3
-#define HDR_ETH_ALEN		6
-#define HDR_NAME_LEN		8
-
-/*
  * We have three pin mux functions that must exist.  We must be able to enable
  * uart0, for initial output and i2c0 to read the main EEPROM.  We then have a
  * main pinmux function that can be overridden to enable all other pinmux that
  * is required on the board.
  */
 void enable_uart0_pin_mux(void);
-void enable_uart1_pin_mux(void);
-void enable_uart2_pin_mux(void);
-void enable_uart3_pin_mux(void);
-void enable_uart4_pin_mux(void);
-void enable_uart5_pin_mux(void);
 void enable_i2c0_pin_mux(void);
 void enable_board_pin_mux(void);
 #endif
