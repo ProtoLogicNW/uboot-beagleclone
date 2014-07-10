@@ -110,11 +110,20 @@ static struct module_pin_mux i2c0_pin_mux[] = {
 	{-1},
 };
 
+/* Not used on Bonelogic R1!*/
 static struct module_pin_mux i2c1_pin_mux[] = {
 	{OFFSET(spi0_d1), (MODE(2) | RXACTIVE |
 			PULLUDEN | SLEWCTRL)},	/* I2C_DATA */
 	{OFFSET(spi0_cs0), (MODE(2) | RXACTIVE |
 			PULLUDEN | SLEWCTRL)},	/* I2C_SCLK */
+	{-1},
+};
+
+/* Touch-screen/PSoC I2c on Bonelogic R1 */
+static struct module_pin_mux i2c2_pin_mux[] = {
+	{OFFSET(uart1_ctsn), (MODE(3) | RXACTIVE | PULLUDEN | SLEWCTRL)}, /*SDA*/
+	{OFFSET(uart1_rtsn), (MODE(3) | RXACTIVE | PULLUDEN | SLEWCTRL)}, /*SCL*/
+	{OFFSET(gpmc_a5), (MODE(7) | RXACTIVE | PULLUP_EN)}, /*TOUCH IRQ1, GPIO1_21*/
 	{-1},
 };
 
@@ -227,8 +236,12 @@ void enable_board_pin_mux()
 	configure_module_pin_mux(spi0_pin_mux);
 	configure_module_pin_mux(spi1_pin_mux);
 	configure_module_pin_mux(uart0_pin_mux);
+	
+	configure_module_pin_mux(i2c2_pin_mux);  //kernel should take care of this... but we'll be double-sure.
+
+
 	configure_module_pin_mux(led_pin_mux);
-	puts("\nMux'ed for BoneLogicR1, bitches!\n");
+	puts("\nApplied pin-mux for BNLGCR1!\n");
 	//hang();
 }
 
