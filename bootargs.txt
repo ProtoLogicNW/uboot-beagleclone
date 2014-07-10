@@ -1,0 +1,4 @@
+console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 fbcon=rotate:1
+console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200 fbcon=rotate:1
+
+bootz 0x80300000 - 0x815f0000
