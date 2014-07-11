@@ -241,7 +241,7 @@ void enable_board_pin_mux()
 
 
 	configure_module_pin_mux(led_pin_mux);
-	puts("\nApplied pin-mux for BNLGCR1!\n");
+	puts("\nApplied pin-mux for BeagleClone R1!\n");
 	//hang();
 }
 

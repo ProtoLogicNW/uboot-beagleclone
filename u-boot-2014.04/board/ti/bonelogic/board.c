@@ -254,7 +254,7 @@ const struct dpll_params dpll_ddr_bone_black = {
 
 void am33xx_spl_board_init(void)
 {
-	puts("BONELOGIC R1\nPROTOLOGIC, 2014\n================\n");
+	puts("BEAGLECLONE R1\nPROTOLOGIC, 2014\n================\n");
 /*	enable_i2c0_pin_mux();
 	if (i2c_probe(TPS65217_CHIP_PM))
 	{

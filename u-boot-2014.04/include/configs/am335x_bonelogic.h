@@ -110,8 +110,8 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
 	"loaddtb=sf read 0x815f0000 ${s3} ${z3};\0" \
 	"loadrootfs=sf read 0x82000000 ${s6} ${z6};\0" \
-	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200\0"\
-	"bootargs_normal=console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200\0"\
+	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
+	"bootargs_normal=console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
 	"boot_recovery=sf probe 0;run loadimage;run loaddtb; run loadrootfs; setenv bootargs ${bootargs_recovery}; bootz 0x80300000 - 0x815f0000;\0"\
 	"boot_normal=sf probe 0;run loadimage;run loaddtb; setenv bootargs ${bootargs_normal}; bootz 0x80300000 - 0x815f0000;\0"\
 	"updateprep=mmc dev 0; mmc rescan; sf probe 0;\0"\
