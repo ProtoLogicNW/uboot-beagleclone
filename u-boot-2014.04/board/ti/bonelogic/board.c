@@ -784,6 +784,8 @@ static void hx8352_setReg(uchar reg, uchar val)
  	udelay(100);
 }
 
+#define Write_LCD_REG hx8352_setReg
+
 static int board_video_init(void)
 {
 	//set all serial signals to known state
@@ -791,8 +793,57 @@ static int board_video_init(void)
 	set_gpio(GPIO_TFT_SDI,1);
 	set_gpio(GPIO_TFT_SCK,1);
 
-	udelay(50000);
+	udelay(5000);
 
+    Write_LCD_REG(0x1A,0x02); //BT
+    Write_LCD_REG(0x1B,0x88); //VRH
+    Write_LCD_REG(0x23,0x00); //SEL_VCM
+    Write_LCD_REG(0x24,0x4E); //VCM
+    Write_LCD_REG(0x25,0x15); //VDV
+    Write_LCD_REG(0x2D,0x03); //NOW[2:0]=011
+    Write_LCD_REG(0x19,0x01); //OSC_EN='1', start Osc
+    Write_LCD_REG(0x01,0x00); //DP_STB='0', out deep sleep
+    Write_LCD_REG(0x1F,0x88); //STB=0
+	udelay(5000);
+    Write_LCD_REG(0x1F,0x80); //DK=0
+	udelay(5000);
+    Write_LCD_REG(0x1F,0x90); //PON=1
+	udelay(5000);
+    Write_LCD_REG(0x1F,0xD0); //VCOMG=1
+	udelay(5000);
+    Write_LCD_REG(0x17,0x05); //default 0x05 65k color
+    Write_LCD_REG(0x36,0x03); //REV_P, SM_P, GS_P, BGR_P, SS_P
+    Write_LCD_REG(0x29,0x31); //400 lines
+    Write_LCD_REG(0x71,0x1A); //RTN
+    Write_LCD_REG(0x40,0x00);
+    Write_LCD_REG(0x41,0x45);
+    Write_LCD_REG(0x42,0x45);
+    Write_LCD_REG(0x43,0x04);
+    Write_LCD_REG(0x44,0x00);
+    Write_LCD_REG(0x45,0x08);
+    Write_LCD_REG(0x46,0x23);
+    Write_LCD_REG(0x47,0x23);
+    Write_LCD_REG(0x48,0x77);
+    Write_LCD_REG(0x49,0x40);
+    Write_LCD_REG(0x4A,0x04);
+    Write_LCD_REG(0x4B,0x00);
+    Write_LCD_REG(0x4C,0x88);
+    Write_LCD_REG(0x4D,0x88);
+    Write_LCD_REG(0x4E,0x88);
+    Write_LCD_REG(0x02,0x00);
+    Write_LCD_REG(0x03,0x00); //Column Start
+    Write_LCD_REG(0x04,0x00);
+    Write_LCD_REG(0x05,0xF0); //Column End 239
+    Write_LCD_REG(0x06,0x00);
+    Write_LCD_REG(0x07,0x00); //Row Start
+    Write_LCD_REG(0x08,0x01);
+    Write_LCD_REG(0x09,0x8F); //Row End 399
+    Write_LCD_REG(0x28,0x38); //GON=1, DTE=1, D=10
+	udelay(50000);
+    Write_LCD_REG(0x28,0x3C); //GON=1, DTE=1, D=11
+    Write_LCD_REG(0x31,0x12); //RM = 1, DM = 10
+
+/*
 	hx8352_setReg(0x28, 0x3c); //GON etc
 	hx8352_setReg(0x1f, 0x7c); //power-on
 	hx8352_setReg(0x31, 0x02); //rgb mode 1
@@ -818,6 +869,7 @@ static int board_video_init(void)
 	hx8352_setReg(0x06, 0x00); 
 	hx8352_setReg(0x07, 0x00); 
 	hx8352_setReg(0x08, 0x01); 
+*/	
 
 	//conf_disp_pll(24, 1);
 	//da8xx_video_init(&lcd_panels[1], &lcd_cfg, lcd_cfg.bpp);

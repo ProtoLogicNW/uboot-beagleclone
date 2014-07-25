@@ -60,29 +60,7 @@
 #endif
 
 #if 1
-/*old 16MB config
-S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
-S2 0x20000 - 0xBFFFF (512k) u-boot.img 
-S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
-S4 0xB0000 - 0xFFFFF (320k) reserved
-S5 0x800000 - 0x3FFFFF (3.5M) zImage
-S6 0x480000 - 0xFFFFFF (11.5M) rootfs
-
-#define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=ttyO0,115200n8\0" \
-	"loadaddr=0x80200000\0" \
-	"loadimage=sf read 0x80300000 0x80000 0x100000;"\
-		"sf read 0x80400000 0x180000 0x100000;"\
-		"sf read 0x80500000 0x280000 0x100000;"\
-		"sf read 0x80600000 0x380000 0x80000;\0" \
-	"loaddtb=sf read 0x815f0000 0xFF0000 0xFFFF;\0" \
-	"loadrootfs1=sf read 0x82000000 0x400000 0x100000;sf read 0x82100000 0x500000 0x100000;sf read 0x82200000 0x600000 0x100000;sf read 0x82300000 0x700000 0x100000;sf read 0x82400000 0x800000 0x100000;sf read 0x82500000 0x900000 0x100000;sf read 0x82600000 0xA00000 0x100000;\0"\
-	"loadrootfs2=sf read 0x82700000 0xB00000 0x100000;sf read 0x82800000 0xC00000 0x100000;sf read 0x82900000 0xD00000 0x100000;sf read 0x82A00000 0xE00000 0x100000;sf read 0x82B00000 0xF00000 0x100000;\0"\
-	"bootargs=console=${console} root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,64M rootfstype=squashfs\0"\
-	"bootlogic=sf probe 0;run loadimage;run loaddtb; run loadrootfs1;run loadrootfs2;bootz 0x80300000 - 0x815f0000;\0"\
-	DFUARGS*/
-
-	/*NEW 16MB config
+/*16MB config
 S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
 S2 0x20000 - 0xBFFFF (512k) u-boot.img 
 S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
@@ -110,6 +88,7 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
 	"loaddtb=sf read 0x815f0000 ${s3} ${z3};\0" \
 	"loadrootfs=sf read 0x82000000 ${s6} ${z6};\0" \
+	"firstboot=sf probe 0; usb start; fatload usb 0:0 $loadaddr 16MB.img; sf update ${loadaddr} 0 ${filesize};\0"\
 	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
 	"bootargs_normal=console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
 	"boot_recovery=sf probe 0;run loadimage;run loaddtb; run loadrootfs; setenv bootargs ${bootargs_recovery}; bootz 0x80300000 - 0x815f0000;\0"\
@@ -179,7 +158,7 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 #if 0
 #define CONFIG_SPL_NET_SUPPORT
 #define CONFIG_SPL_ENV_SUPPORT
-#define CONFIG_SPL_NET_VCI_STRING	"BoneLogic U-Boot SPL"
+#define CONFIG_SPL_NET_VCI_STRING	"BeagleClone U-Boot SPL"
 #endif
 
 /* SPI flash. */

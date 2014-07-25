@@ -217,6 +217,7 @@ static struct module_pin_mux lcdc_pin_mux[] = {
 	{OFFSET(mcasp0_ahclkr), (MODE(7))},	/* TFT CS, gpio 1_28 */
 	{OFFSET(gpmc_ad4), (MODE(7))},	/* TFT SDI, gpio 1_4 */
 	{OFFSET(gpmc_ad5), (MODE(7))},	/* TFT SCLK, gpio 1_5 */
+	{OFFSET(gpmc_ad2), (MODE(6))},	/* TFT Backlight PWM, gpio 1_18, EHRPWM1A */	
 	{-1},
 };
 
