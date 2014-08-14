@@ -86,7 +86,7 @@ static struct module_pin_mux mmc0_pin_mux_sk_evm[] = {
 	{OFFSET(mmc0_dat0), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* MMC0_DAT0 */
 	{OFFSET(mmc0_clk), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* MMC0_CLK */
 	{OFFSET(mmc0_cmd), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* MMC0_CMD */
-//	{OFFSET(spi0_cs1), (MODE(5) | RXACTIVE | PULLUP_EN)},	/* MMC0_CD */
+	{OFFSET(spi0_cs1), (MODE(5) | RXACTIVE | PULLUP_EN)},	/* MMC0_CD */
 	{-1},
 };
 
@@ -237,9 +237,9 @@ void enable_board_pin_mux()
 	configure_module_pin_mux(spi0_pin_mux);
 	configure_module_pin_mux(spi1_pin_mux);
 	configure_module_pin_mux(uart0_pin_mux);
+	configure_module_pin_mux(mmc0_pin_mux_sk_evm);
 	
 	configure_module_pin_mux(i2c2_pin_mux);  //kernel should take care of this... but we'll be double-sure.
-
 
 	configure_module_pin_mux(led_pin_mux);
 	puts("\nApplied pin-mux for BeagleClone R1!\n");

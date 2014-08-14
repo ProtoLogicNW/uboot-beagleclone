@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef __CONFIG_AM335X_BONELOGIC_H
-#define __CONFIG_AM335X_BONELOGIC_H
+#ifndef __CONFIG_AM335X_BONELOGICSD_H
+#define __CONFIG_AM335X_BONELOGICSD_H
 
 #include <configs/ti_am335x_common.h>
 
@@ -59,71 +59,115 @@
 #define CONFIG_SYS_CONSOLE_FG_COL	0x00
 #endif
 
-#if 1
-/*16MB config
-S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
-S2 0x20000 - 0xBFFFF (512k) u-boot.img 
-S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
-S4 0xB0000 - 0xFFFFF (320k) reserved
-S5 0x100000 - 0x47FFFF (3.5M) zImage
-S6 0x480000 - 0xFFFFFF (11.5M) rootfs
-*/
-
-
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"s1=0\0"\
-	"z1=0x1FFFF\0"\
-	"s2=0x20000\0"\
-	"z2=0x7FFFF\0"\
-	"s3=0xA0000\0"\
-	"z3=0x0FFFF\0"\
-	"s4=0xB0000\0"\
-	"z4=0x4FFFF\0"\
-	"s5=0x100000\0"\
-	"z5=0x37FFFF\0"\
-	"s6=0x480000\0"\
-	"z6=0xB7FFFF\0"\
-	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
-	"loadaddr=0x80200000\0" \
-	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
-	"loaddtb=sf read 0x815f0000 ${s3} ${z3};\0" \
-	"loadrootfs=sf read 0x82000000 ${s6} ${z6};\0" \
-	"firstboot=sf probe 0; usb start; fatload usb 0:0 $loadaddr 16MB.img; sf update ${loadaddr} 0 ${filesize};\0"\
-	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
-	"bootargs_normal=console=ttyO0,115200n8 root=/dev/mtdblock1 rw ramdisk_size=65536 rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
-	"bootargs_mmc=console=ttyO0,115200n8 root=/dev/mmcblk0p2 rw rootwait earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
-	"boot_recovery=sf probe 0;run loadimage;run loaddtb; run loadrootfs; setenv bootargs ${bootargs_recovery}; bootz 0x80300000 - 0x815f0000;\0"\
-	"boot_normal=sf probe 0;run loadimage;run loaddtb; setenv bootargs ${bootargs_normal}; bootz 0x80300000 - 0x815f0000;\0"\
-	"boot_mmc=mmc dev 0; mmc rescan; fatload mmc :1 0x80300000 zImage; fatload mmc :1 0x815f0000 am335x_beagleclone.dtb; setenv bootargs ${bootargs_mmc}; bootz 0x80300000 - 0x815f0000;\0"\
-	"updateprep=mmc dev 0; mmc rescan; sf probe 0;\0"\
-	"updtboot=run updateprep;fatload mmc 0 ${loadaddr} MLO.byteswap;sf update ${loadaddr} ${s1} ${filesize};fatload mmc 0 ${loadaddr} u-boot.img; sf update ${loadaddr} ${s2} ${filesize};\0"\
-	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} am335x-bonelogic.dtb; sf update ${loadaddr} ${s3} ${filesize};\0"\
-	"updtfs=run updateprep;fatload mmc 0 ${loadaddr} bonelogic-min.sq; sf update ${loadaddr} ${s6} ${filesize};\0"\
-	"updtall=run updtboot; run updtimg; run updtfs;\0"\
-	DFUARGS
-
-#else
-//32MB config
-#define CONFIG_EXTRA_ENV_SETTINGS \
-	"console=ttyO0,115200n8\0" \
-	"loadaddr=0x80200000\0" \
-	"loadimage=sf read 0x80300000 0x80000 0x100000;"\
-		"sf read 0x80400000 0x180000 0x100000;"\
-		"sf read 0x80500000 0x280000 0x100000;"\
-		"sf read 0x80600000 0x380000 0x80000;\0" \
-	"loaddtb=sf read 0x815f0000 0x1FF0000 0xFFFF;\0" \
-	"loadrootfs1=sf read 0x82000000 0x400000 0x100000;sf read 0x82100000 0x500000 0x100000;sf read 0x82200000 0x600000 0x100000;sf read 0x82300000 0x700000 0x100000;sf read 0x82400000 0x800000 0x100000;sf read 0x82500000 0x900000 0x100000;sf read 0x82600000 0xA00000 0x100000;\0"\
-	"loadrootfs2=sf read 0x82700000 0xB00000 0x100000;sf read 0x82800000 0xC00000 0x100000;sf read 0x82900000 0xD00000 0x100000;sf read 0x82A00000 0xE00000 0x100000;sf read 0x82B00000 0xF00000 0x100000;sf read 0x82C00000 0x1000000 0x100000;sf read 0x82D00000 0x1100000 0x100000;\0"\
-	"loadrootfs3=sf read 0x82E00000 0x1200000 0x100000;sf read 0x82F00000 0x1300000 0x100000;sf read 0x83000000 0x1400000 0x100000;sf read 0x83100000 0x1500000 0x100000;sf read 0x83200000 0x1600000 0x100000;sf read 0x83300000 0x1700000 0x100000;sf read 0x83400000 0x1800000 0x100000;\0"\
-	"loadrootfs4=sf read 0x83500000 0x1900000 0x100000;sf read 0x83600000 0x1A00000 0x100000;sf read 0x83700000 0x1B00000 0x100000;sf read 0x83800000 0x1C00000 0x100000;sf read 0x83900000 0x1D00000 0x100000;sf read 0x83A00000 0x1E00000 0x100000;sf read 0x83B00000 0x1F00000 0x100000;\0"\
-	"bootargs=console=${console} root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,64M rootfstype=squashfs\0"\
-	"bootlogic=sf probe 0;run loadimage;run loaddtb; run loadrootfs1;run loadrootfs2;run loadrootfs3;run loadrootfs4; bootz 0x80300000 - 0x815f0000;\0"\
-	NANDARGS \
-	DFUARGS
+        "loadaddr=0x80200000\0" \
+        "fdtaddr=0x80F80000\0" \
+        "fdt_high=0xffffffff\0" \
+        "boot_fdt=try\0" \
+        "rdaddr=0x81000000\0" \
+        "bootpart=0:2\0" \
+        "bootdir=/boot\0" \
+        "bootfile=zImage\0" \
+        "fdtfile=undefined\0" \
+        "console=ttyO0,115200n8\0" \
+        "partitions=" \
+                "uuid_disk=${uuid_gpt_disk};" \
+                "name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}\0" \
+        "optargs=\0" \
+        "mmcdev=0\0" \
+        "mmcroot=/dev/mmcblk0p2 ro\0" \
+        "mmcrootfstype=ext4 rootwait\0" \
+        "rootpath=/export/rootfs\0" \
+        "nfsopts=nolock\0" \
+        "static_ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}" \
+                "::off\0" \
+        "ramroot=/dev/ram0 rw ramdisk_size=65536 initrd=${rdaddr},64M\0" \
+        "ramrootfstype=ext2\0" \
+        "mmcargs=setenv bootargs console=${console} " \
+                "${optargs} " \
+                "root=${mmcroot} " \
+                "rootfstype=${mmcrootfstype}\0" \
+        "spiroot=/dev/mtdblock4 rw\0" \
+        "spirootfstype=jffs2\0" \
+        "spisrcaddr=0xe0000\0" \
+        "spiimgsize=0x362000\0" \
+        "spibusno=0\0" \
+        "spiargs=setenv bootargs console=${console} " \
+                "${optargs} " \
+                "root=${spiroot} " \
+                "rootfstype=${spirootfstype}\0" \
+        "netargs=setenv bootargs console=${console} " \
+                "${optargs} " \
+                "root=/dev/nfs " \
+                "nfsroot=${serverip}:${rootpath},${nfsopts} rw " \
+                "ip=dhcp\0" \
+        "bootenv=uEnv.txt\0" \
+        "loadbootenv=load mmc ${mmcdev} ${loadaddr} ${bootenv}\0" \
+        "importbootenv=echo Importing environment from mmc ...; " \
+                "env import -t $loadaddr $filesize\0" \
+        "ramargs=setenv bootargs console=${console} " \
+                "${optargs} " \
+                "root=${ramroot} " \
+                "rootfstype=${ramrootfstype}\0" \
+        "loadramdisk=load mmc ${mmcdev} ${rdaddr} ramdisk.gz\0" \
+        "loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
+        "loadfdt=load mmc ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
+        "mmcloados=run mmcargs; " \
+                "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
+                        "if run loadfdt; then " \
+                                "bootz ${loadaddr} - ${fdtaddr}; " \
+                        "else " \
+                                "if test ${boot_fdt} = try; then " \
+                                        "bootz; " \
+                                "else " \
+                                        "echo WARN: Cannot load the DT; " \
+                                "fi; " \
+                        "fi; " \
+                "else " \
+                        "bootz; " \
+                "fi;\0" \
+        "mmcboot=mmc dev ${mmcdev}; " \
+                "if mmc rescan; then " \
+                        "echo SD/MMC found on device ${mmcdev};" \
+                        "if run loadbootenv; then " \
+                                "echo Loaded environment from ${bootenv};" \
+                                "run importbootenv;" \
+                        "fi;" \
+                        "if test -n $uenvcmd; then " \
+                                "echo Running uenvcmd ...;" \
+                                "run uenvcmd;" \
+                        "fi;" \
+                        "if run loadimage; then " \
+                                "run mmcloados;" \
+                        "fi;" \
+                "fi;\0" \
+        "spiboot=echo Booting from spi ...; " \
+                "run spiargs; " \
+                "sf probe ${spibusno}:0; " \
+                "sf read ${loadaddr} ${spisrcaddr} ${spiimgsize}; " \
+                "bootz ${loadaddr}\0" \
+        "netboot=echo Booting from network ...; " \
+                "setenv autoload no; " \
+                "dhcp; " \
+                "tftp ${loadaddr} ${bootfile}; " \
+                "tftp ${fdtaddr} ${fdtfile}; " \
+                "run netargs; " \
+                "bootz ${loadaddr} - ${fdtaddr}\0" \
+        "ramboot=echo Booting from ramdisk ...; " \
+                "run ramargs; " \
+                "bootz ${loadaddr} ${rdaddr} ${fdtaddr}\0" \
+        "findfdt=setenv fdtfile am335x-beagleclone.dtb;\0" \
+        DFUARGS
 #endif
-#endif
 
-#define CONFIG_BOOTCOMMAND  "run boot_normal;" 
+#define CONFIG_BOOTCOMMAND \
+        "run findfdt; " \
+        "run mmcboot;" \
+        "setenv mmcdev 1; " \
+        "setenv bootpart 1:2; " \
+        "run mmcboot;" \
+        "run nandboot;"
+
 
 /* NS16550 Configuration */
 #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
@@ -324,4 +368,4 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 #define CONFIG_PHY_SMSC
 #endif
 
-#endif	/* ! __CONFIG_AM335X_BONELOGIC_H */
+#endif	/* ! __CONFIG_AM335X_BONELOGICSD_H */

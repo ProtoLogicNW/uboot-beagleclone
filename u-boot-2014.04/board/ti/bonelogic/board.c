@@ -254,107 +254,38 @@ const struct dpll_params dpll_ddr_bone_black = {
 
 void am33xx_spl_board_init(void)
 {
+	int usb_cur_lim;
+
 	puts("BEAGLECLONE R1\nPROTOLOGIC, 2014\n================\n");
-/*	enable_i2c0_pin_mux();
+	enable_i2c0_pin_mux();
 	if (i2c_probe(TPS65217_CHIP_PM))
 	{
 		puts("PMIC i2c probe failed!\n");
 		return;
 	}
-*/	
+
+        usb_cur_lim = TPS65217_USB_INPUT_CUR_LIMIT_1300MA;
+
+        if (tps65217_reg_write(TPS65217_PROT_LEVEL_NONE,TPS65217_POWER_PATH,usb_cur_lim,TPS65217_USB_INPUT_CUR_LIMIT_MASK))
+		puts("tps65217_reg_write failure\n");
+	
+
 	/* Get the max CPU frequency & set it... */
-	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
-	//dpll_mpu_opp100.m = MPUPLL_M_300;
+	//dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
+	dpll_mpu_opp100.m = 500;//MPUPLL_M_500;
 	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 
 	//set CORE to opp100
 	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
 
-	puts("OPP100 set.\n");
+	puts("500MHz\n");
 	return;
-
-#if 0 /* old stuff */	
-	uchar pmic_status_reg;
-	if (tps65217_reg_read(TPS65217_STATUS,&pmic_status_reg))
-		return;
-	if (!(pmic_status_reg & TPS65217_PWR_SRC_AC_BITMASK)) 
-	{
-		puts("No AC power, disabling frequency switch\n");
-		return;
-	}
-	
-	//FYI setting PLL for 1GHz (BBB)
-	dpll_mpu_opp100.m = MPUPLL_M_1000;
-	usb_cur_lim = TPS65217_USB_INPUT_CUR_LIMIT_1300MA;
-	mpu_vdd = TPS65217_DCDC_VOLT_SEL_1275MV;
-
-	if (tps65217_reg_write(TPS65217_PROT_LEVEL_NONE,TPS65217_POWER_PATH,usb_cur_lim,TPS65217_USB_INPUT_CUR_LIMIT_MASK))
-			puts("tps65217_reg_write failure\n");
-
-	// DCDC3 (CORE) voltage to 1.125V
-	if (tps65217_voltage_update(TPS65217_DEFDCDC3,TPS65217_DCDC_VOLT_SEL_1125MV)) {
-			puts("tps65217_voltage_update failure\n");
-			return;
-	}
-
-	/* Set CORE Frequencies to OPP100 */
-	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
-
-	/* Set DCDC2 (MPU) voltage */
-	if (tps65217_voltage_update(TPS65217_DEFDCDC2, mpu_vdd)) {
-		puts("tps65217_voltage_update failure\n");
-		return;
-	}
-
-	TODO: LDO settings
-	//LDO3, LDO4 output voltage to 3.3V for Beaglebone.
-	//LDO3 to 1.8V and LDO4 to 3.3V for Beaglebone Black.
-	if (tps65217_reg_write(TPS65217_PROT_LEVEL_2,TPS65217_DEFLS1,TPS65217_LDO_VOLTAGE_OUT_1_8,TPS65217_LDO_MASK))
-		--OR--
-	if (tps65217_reg_write(TPS65217_PROT_LEVEL_2,TPS65217_DEFLS1,TPS65217_LDO_VOLTAGE_OUT_3_3,TPS65217_LDO_MASK))
-		puts("tps65217_reg_write failure\n");
-
-	if (tps65217_reg_write(TPS65217_PROT_LEVEL_2,TPS65217_DEFLS2,TPS65217_LDO_VOLTAGE_OUT_3_3,TPS65217_LDO_MASK))
-			puts("tps65217_reg_write failure\n");
-
-EVM-SK FLOW
-	int sil_rev;
-	/*
-	 * The GP EVM, IDK and EVM SK use a TPS65910 PMIC.  For all
-	 * MPU frequencies we support we use a CORE voltage of
-	 * 1.1375V.  For MPU voltage we need to switch based on
-	 * the frequency we are running at.
-	 */
-	if(i2c_probe(TPS65910_CTRL_I2C_ADDR))
-		return;
-
-	/*
-	 * Depending on MPU clock and PG we will need a different
-	 * VDD to drive at that speed.
-	 */
-	sil_rev = readl(&cdev->deviceid) >> 28;
-	mpu_vdd = am335x_get_tps65910_mpu_vdd(sil_rev,dpll_mpu_opp100.m);
-
-	/* Tell the TPS65910 to use i2c */
-	tps65910_set_i2c_control();
-
-	/* First update MPU voltage. */
-	if (tps65910_voltage_update(MPU, mpu_vdd))
-		return;
-
-	/* Second, update the CORE voltage. */
-	if (tps65910_voltage_update(CORE, TPS65910_OP_REG_SEL_1_1_3))
-		return;
-
-	/* Set CORE Frequencies to OPP100 */
-	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
-#endif
 }
 
 const struct dpll_params *get_dpll_ddr_params(void)	
 {
-	//enable_i2c0_pin_mux();
-	//i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
+	enable_i2c0_pin_mux();
+	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
 	
 	//return &dpll_ddr_evm_sk;
 	//return &dpll_ddr_bone_black;
@@ -425,7 +356,7 @@ int board_init(void)
 	hw_watchdog_init();
 #endif
 
-	//led init
+	//led init...
 	printf("Setting status LEDs...\n");
 	set_gpio(GPIO_LED_BLUE, 1);
 	set_gpio(GPIO_LED_ORANGE, 1);
