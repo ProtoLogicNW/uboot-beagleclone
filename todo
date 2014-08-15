@@ -1,3 +1,1 @@
-add env cmd for automated replacement of bootloader, kernel & rootfs
-
-change to uImage
+sd card boot!
