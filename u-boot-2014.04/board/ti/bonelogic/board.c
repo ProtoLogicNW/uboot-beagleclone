@@ -45,7 +45,8 @@ static int board_video_init(void);
 
 #define GPIO_TFT_SDI		GPIO_TO_PIN(1,4) 	/* gpio1_4, gpmc_ad4 */
 #define GPIO_TFT_SCK		GPIO_TO_PIN(1,5) 	/* gpio1_5, gpmc_ad5 */
-#define GPIO_TFT_CS			GPIO_TO_PIN(1,28)	/* gpio1_28, mcasp0_ahclkr */
+#define GPIO_TFT_CS		GPIO_TO_PIN(1,28)	/* gpio1_28, mcasp0_ahclkr */
+#define GPIO_TFT_RESET		GPIO_TO_PIN(1,31)	/* gpio1_31, gpmc_csn2 */
 
 #define GPIO_LED_BLUE		GPIO_TO_PIN(2,2)
 #define GPIO_LED_ORANGE		GPIO_TO_PIN(2,3)
@@ -362,7 +363,6 @@ int board_init(void)
 	set_gpio(GPIO_LED_ORANGE, 1);
 	set_gpio(GPIO_LED_GREEN, 1);
 
-	board_video_init();
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
 #if defined(CONFIG_NOR) || defined(CONFIG_NAND)
@@ -374,6 +374,8 @@ int board_init(void)
 
 int board_late_init(void)
 {
+	board_video_init();
+
 	return 0;
 }
 
@@ -720,11 +722,18 @@ static void hx8352_setReg(uchar reg, uchar val)
 static int board_video_init(void)
 {
 	//set all serial signals to known state
+	set_gpio(GPIO_TFT_RESET,0); //reset
+	printf("TFT Reset Asserted! (gpio%03d)\n",GPIO_TFT_RESET);
+	udelay(1000000); //150mS max treset
 	set_gpio(GPIO_TFT_CS,1);
 	set_gpio(GPIO_TFT_SDI,1);
 	set_gpio(GPIO_TFT_SCK,1);
+	udelay(1000000);
+	set_gpio(GPIO_TFT_RESET,1);
+	printf("TFT Reset Deasserted (gpio%03d)... ",GPIO_TFT_RESET);
+	udelay(1000000); //150mS max treset
+	printf(" done!\n");
 
-	udelay(5000);
 
     Write_LCD_REG(0x1A,0x02); //BT
     Write_LCD_REG(0x1B,0x88); //VRH
@@ -774,39 +783,12 @@ static int board_video_init(void)
     Write_LCD_REG(0x28,0x3C); //GON=1, DTE=1, D=11
     Write_LCD_REG(0x31,0x12); //RM = 1, DM = 10
 
-/*
-	hx8352_setReg(0x28, 0x3c); //GON etc
-	hx8352_setReg(0x1f, 0x7c); //power-on
-	hx8352_setReg(0x31, 0x02); //rgb mode 1
-	hx8352_setReg(0x36, 0x03); 
-	hx8352_setReg(0x40, 0x00); 
-	hx8352_setReg(0x41, 0x45); 
-	hx8352_setReg(0x42, 0x45); 
-	hx8352_setReg(0x44, 0x00); 
-	hx8352_setReg(0x45, 0x08); 
-	hx8352_setReg(0x46, 0x23); 
-	hx8352_setReg(0x47, 0x23); 
-	hx8352_setReg(0x48, 0x23);  //need to check
-	hx8352_setReg(0x49, 0x40);  
-	hx8352_setReg(0x4A, 0x04); 
-	hx8352_setReg(0x4B, 0x00); 
-	hx8352_setReg(0x4C, 0x88); 
-	hx8352_setReg(0x4D, 0x88); 
-	hx8352_setReg(0x4E, 0x88); 
-	hx8352_setReg(0x02, 0x00); 
-	hx8352_setReg(0x03, 0x00); 
-	hx8352_setReg(0x04, 0x00); 
-	hx8352_setReg(0x05, 0xF0); 
-	hx8352_setReg(0x06, 0x00); 
-	hx8352_setReg(0x07, 0x00); 
-	hx8352_setReg(0x08, 0x01); 
-*/	
-
 	//conf_disp_pll(24, 1);
 	//da8xx_video_init(&lcd_panels[1], &lcd_cfg, lcd_cfg.bpp);
 
 	//enable_pwm();
 	//enable_backlight();
+	udelay(1000000); //150mS max treset
 
 	return 0;
 }
