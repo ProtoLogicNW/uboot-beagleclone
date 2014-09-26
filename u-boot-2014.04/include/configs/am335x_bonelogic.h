@@ -59,17 +59,16 @@
 #define CONFIG_SYS_CONSOLE_FG_COL	0x00
 #endif
 
+
 #if 1
-/*16MB config
+/* NEW 16MB config
 S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
-S2 0x20000 - 0xBFFFF (512k) u-boot.img 
+S2 0x20000 - 0xBFFFF (512k) u-boot.img
 S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
-S4 0xB0000 - 0xFFFFF (320k) reserved
-S5 0x100000 - 0x47FFFF (3.5M) zImage
-S6 0x480000 - 0xFFFFFF (11.5M) rootfs
+S4 0xB0000 - 0x1AFFFF (1024k) reserved
+S5 0x1B0000 - 0x4AFFFF (3072k) zImage
+S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 */
-
-
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"s1=0\0"\
 	"z1=0x1FFFF\0"\
@@ -78,11 +77,11 @@ S6 0x480000 - 0xFFFFFF (11.5M) rootfs
 	"s3=0xA0000\0"\
 	"z3=0x0FFFF\0"\
 	"s4=0xB0000\0"\
-	"z4=0x4FFFF\0"\
-	"s5=0x100000\0"\
-	"z5=0x37FFFF\0"\
-	"s6=0x480000\0"\
-	"z6=0xB7FFFF\0"\
+	"z4=0xFFFFF\0"\
+	"s5=0x1B0000\0"\
+	"z5=0x2FFFFF\0"\
+	"s6=0x4B0000\0"\
+	"z6=0xB4FFFF\0"\
 	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
 	"loadaddr=0x80200000\0" \
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \

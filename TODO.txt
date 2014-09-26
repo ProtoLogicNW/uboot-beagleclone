@@ -1,0 +1,3 @@
+Fix LCD reset
+Enable mux for SPI2 to see if that fixes crash when running sf probe 2
+
