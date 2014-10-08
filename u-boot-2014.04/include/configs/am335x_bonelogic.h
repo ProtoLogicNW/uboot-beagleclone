@@ -79,8 +79,8 @@ S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 	"z4=0xFFFFF\0"\
 	"s5=0x1B0000\0"\
 	"z5=0x2FFFFF\0"\
-	"s6=0x4B0000\0"\
-	"z6=0xB4FFFF\0"\
+	"s6=0x5B0000\0"\
+	"z6=0x9CFFFF\0"\
 	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
 	"loadaddr=0x80200000\0" \
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
@@ -99,6 +99,9 @@ S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} am335x-bonelogic.dtb; sf update ${loadaddr} ${s3} ${filesize};\0"\
 	"updtfs=run updateprep;fatload mmc 0 ${loadaddr} bonelogic-min.sq; sf update ${loadaddr} ${s6} ${filesize};\0"\
 	"updtall=run updtboot; run updtimg; run updtfs;\0"\
+	"nfsburn=nfs 0x80200000 169.254.99.129:/srv/nfs/boot.img; sf probe 0; sf update ${loadaddr} 0 ${filesize};\0"\
+	"serverip=169.254.99.129;\0"\
+	"ipaddr=169.254.99.130;\0"\
 	DFUARGS
 #else
 //32MB config
