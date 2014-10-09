@@ -66,7 +66,7 @@ S2 0x20000 - 0xBFFFF (512k) u-boot.img
 S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
 S4 0xB0000 - 0x1AFFFF (1024k) initrd
 S5 0x1B0000 - 0x4AFFFF (3072k) zImage
-S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
+S6 0x5B0000 - 0xFFFFFF (11584k) rootfs
 */
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"s1=0\0"\
@@ -79,8 +79,8 @@ S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 	"z4=0xFFFFF\0"\
 	"s5=0x1B0000\0"\
 	"z5=0x2FFFFF\0"\
-	"s6=0x5B0000\0"\
-	"z6=0x9CFFFF\0"\
+	"s6=0x6B0000\0"\
+	"z6=0x8CFFFF\0"\
 	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
 	"loadaddr=0x80200000\0" \
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
