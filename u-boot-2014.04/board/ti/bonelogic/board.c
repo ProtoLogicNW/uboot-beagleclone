@@ -723,16 +723,16 @@ static int board_video_init(void)
 {
 	//set all serial signals to known state
 	set_gpio(GPIO_TFT_RESET,0); //reset
-	printf("TFT Reset Asserted! (gpio%03d)\n",GPIO_TFT_RESET);
-	udelay(1000000); //150mS max treset
+	//printf("TFT Reset Asserted! (gpio%03d)\n",GPIO_TFT_RESET);
+	udelay(150000); //150mS max treset
 	set_gpio(GPIO_TFT_CS,1);
 	set_gpio(GPIO_TFT_SDI,1);
 	set_gpio(GPIO_TFT_SCK,1);
-	udelay(1000000);
+	udelay(150000);
 	set_gpio(GPIO_TFT_RESET,1);
-	printf("TFT Reset Deasserted (gpio%03d)... ",GPIO_TFT_RESET);
+	//printf("TFT Reset Deasserted (gpio%03d)... ",GPIO_TFT_RESET);
 	udelay(1000000); //150mS max treset
-	printf(" done!\n");
+	//printf(" done!\n");
 
 
     Write_LCD_REG(0x1A,0x02); //BT
