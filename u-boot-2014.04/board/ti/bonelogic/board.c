@@ -297,6 +297,19 @@ const struct dpll_params *get_dpll_ddr_params(void)
 void set_mux_conf_regs(void)
 {
 	enable_board_pin_mux(); //mux.c
+
+    //enable SPI1 clock
+    struct cm_perpll *cmper = (struct cm_perpll *)CM_PER; 
+    u32 *const clk_domains[] = {
+        &cmper->spi1clkctrl,
+        0
+    };
+    u32 *const clk_modules_explicit_en[] = {
+        &cmper->spi1clkctrl,
+        0
+    };
+    do_enable_clocks(clk_domains, clk_modules_explicit_en, 1);
+
 }
 
 const struct ctrl_ioregs ioregs_evmsk = {
