@@ -58,13 +58,13 @@
 #define CONFIG_SYS_CONSOLE_FG_COL	0x00
 #endif
 
-/* NEW 16MB config
+/* 16MB BOOT FLASH config
 S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
 S2 0x20000 - 0xBFFFF (512k) u-boot.img 
 S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
-S4 0xB0000 - 0x1AFFFF (1024k) initrd
-S5 0x1B0000 - 0x4AFFFF (3072k) zImage
-S6 0x5B0000 - 0xFFFFFF (11584k) rootfs
+S4 not used 
+S5 0x0B0000 - 0x4AFFFF (4096k) zImage
+S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 */
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"s1=0\0"\
@@ -73,36 +73,39 @@ S6 0x5B0000 - 0xFFFFFF (11584k) rootfs
 	"z2=0x7FFFF\0"\
 	"s3=0xA0000\0"\
 	"z3=0x0FFFF\0"\
-	"s4=0xB0000\0"\
-	"z4=0xFFFFF\0"\
-	"s5=0x1B0000\0"\
-	"z5=0x2FFFFF\0"\
-	"s6=0x6B0000\0"\
-	"z6=0x8CFFFF\0"\
+	"s4=0x00000\0"\
+	"z4=0x00000\0"\
+	"s5=0x0B0000\0"\
+	"z5=0x3FFFFF\0"\
+	"s6=0x4B0000\0"\
+	"z6=0xB4FFFF\0"\
 	"bootdbg=earlyprintk=serial,ttyO0,115200\0" \
 	"loadaddr=0x80200000\0" \
 	"loadimage=sf read 0x80300000 ${s5} ${z5};\0" \
 	"loaddtb=sf read 0x815f0000 ${s3} ${z3};\0" \
 	"loadinitrd=sf read 0x82000000 ${s4} ${z4};\0" \
 	"loadrootfs=sf read 0x82000000 ${s6} ${z6};\0" \
-	"firstboot=sf probe 0; usb start; fatload usb 0:0 $loadaddr 16MB.img; sf update ${loadaddr} 0 ${filesize};\0"\
-	"bootargs_recovery=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
-	"bootargs_normal=console=ttyO0,115200n8 root=/dev/ram0 rw initrd=0x82000000,4M init=/linuxrc earlyprintk=serial,ttyO0,115200 consoleblank=0 panic=10\0"\
+	"dtb=am335x-beaglephone.dtb\0"\
+	"sfs=beaglephone_boot.sfs\0"\
+	"bootargs_spi=console=ttyO0,115200n8 root=/dev/ram0 rw ramdisk_size=65536 initrd=0x82000000,32M rootfstype=squashfs earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
+	"bootargs_sfs=console=ttyO0,115200n8 root=/dev/ram0 rw initrd=0x82000000,4M init=/linuxrc earlyprintk=serial,ttyO0,115200 consoleblank=0 panic=10\0"\
 	"bootargs_mmc=console=ttyO0,115200n8 root=/dev/mmcblk0p2 rw rootwait earlyprintk=serial,ttyO0,115200 consoleblank=0\0"\
-	"boot_recovery=sf probe 0;run loadimage;run loaddtb; run loadrootfs; setenv bootargs ${bootargs_recovery}; bootz 0x80300000 - 0x815f0000;\0"\
-	"boot_normal=sf probe 0;run loadimage;run loaddtb;run loadinitrd; setenv bootargs ${bootargs_normal}; bootz 0x80300000 - 0x815f0000;\0"\
-	"boot_mmc=mmc dev 0; mmc rescan; fatload mmc :1 0x80300000 zImage; fatload mmc :1 0x815f0000 am335x-bonephone.dtb; setenv bootargs ${bootargs_mmc}; bootz 0x80300000 - 0x815f0000;\0"\
+	"boot_spi=echo Booting SPI; sf probe 0;run loadimage;run loaddtb;run loadrootfs; setenv bootargs ${bootargs_spi}; bootz 0x80300000 - 0x815f0000;\0"\
+	"boot_sfs=sf probe 0;run loadimage;run loaddtb;run loadinitrd; setenv bootargs ${bootargs_sfs}; bootz 0x80300000 - 0x815f0000;\0"\
+	"boot_mmc=run boot_mmc1;\0"\
+	"boot_mmc1=mmc dev 0; mmc rescan; fatload mmc :1 0x815f0000 ${dtb}; run boot_mmc1;\0"\
+	"boot_mmc2=echo Booting MMC; fatload mmc :1 0x80300000 zImage; setenv bootargs ${bootargs_mmc}; bootz 0x80300000 - 0x815f0000;\0"\
+	"beaglephone_boot=mmc dev 0; if fatload mmc :1 0x815f0000 ${dtb}; then run boot_mmc2; else run boot_spi; fi;\0"\
 	"updateprep=mmc dev 0; mmc rescan; sf probe 0;\0"\
 	"updtboot=run updateprep;fatload mmc 0 ${loadaddr} MLO.byteswap;sf update ${loadaddr} ${s1} ${filesize};fatload mmc 0 ${loadaddr} u-boot.img; sf update ${loadaddr} ${s2} ${filesize};\0"\
-	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} am335x-bonelogic.dtb; sf update ${loadaddr} ${s3} ${filesize};\0"\
-	"updtfs=run updateprep;fatload mmc 0 ${loadaddr} bonelogic-min.sq; sf update ${loadaddr} ${s6} ${filesize};\0"\
+	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} ${dtb}; sf update ${loadaddr} ${s3} ${filesize};\0"\
+	"updtfs=run updateprep;fatload mmc 0 ${loadaddr} ${sfs}; sf update ${loadaddr} ${s6} ${filesize};\0"\
 	"updtall=run updtboot; run updtimg; run updtfs;\0"\
-	"nfsburn=nfs 0x80200000 169.254.99.129:/srv/nfs/boot.img; sf probe 0; sf update ${loadaddr} 0 ${filesize};\0"\
+	"nfsburn=nfs 0x80200000 169.254.99.129:/srv/nfs/spi.img; sf probe 0; sf update ${loadaddr} 0 ${filesize};\0"\
 	"serverip=169.254.99.129;\0"\
 	"ipaddr=169.254.99.130;\0"\
 	DFUARGS
-
-#define CONFIG_BOOTCOMMAND  "run boot_mmc;" 
+#define CONFIG_BOOTCOMMAND  "run beaglephone_boot;" 
 
 #endif
 
