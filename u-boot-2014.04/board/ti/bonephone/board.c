@@ -273,8 +273,6 @@ void am33xx_spl_board_init(void)
 
 	//set CORE to opp100
 	do_setup_dpll(&dpll_core_regs, &dpll_core_opp100);
-
-	puts("500MHz\n");
 	return;
 }
 
@@ -452,6 +450,8 @@ int board_eth_init(bd_t *bis)
 	uint8_t mac_addr[6];
 	uint32_t mac_hi, mac_lo;
 
+	printf("Configuring MAC addresses...");
+
 	/* try reading mac address from efuse */
 	mac_lo = readl(&cdev->macid0l);
 	mac_hi = readl(&cdev->macid0h);
@@ -461,17 +461,8 @@ int board_eth_init(bd_t *bis)
 	mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
 	mac_addr[4] = mac_lo & 0xFF;
 	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+	eth_setenv_enetaddr("ethaddr", mac_addr);
 
-#if(defined(CONFIG_DRIVER_TI_CPSW) && !defined(CONFIG_SPL_BUILD)) || \
-	(defined(CONFIG_SPL_ETH_SUPPORT) && defined(CONFIG_SPL_BUILD))
-	if (!getenv("ethaddr")) {
-		printf("<ethaddr> not set. Validating first E-fuse MAC\n");
-
-		if (is_valid_ether_addr(mac_addr))
-			eth_setenv_enetaddr("ethaddr", mac_addr);
-	}
-
-#ifdef CONFIG_DRIVER_TI_CPSW
 	mac_lo = readl(&cdev->macid1l);
 	mac_hi = readl(&cdev->macid1h);
 	mac_addr[0] = mac_hi & 0xFF;
@@ -480,53 +471,18 @@ int board_eth_init(bd_t *bis)
 	mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
 	mac_addr[4] = mac_lo & 0xFF;
 	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+	eth_setenv_enetaddr("eth1addr", mac_addr);
 
-	if (!getenv("eth1addr")) {
-		if (is_valid_ether_addr(mac_addr))
-			eth_setenv_enetaddr("eth1addr", mac_addr);
-	}
+#if  defined(CONFIG_USB_ETHER) && (!defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_USBETH_SUPPORT))
+	mac_addr[0]=0x69;
+	mac_addr[1]=0x69;
+	mac_addr[2]=0x69;
+	mac_addr[3]=0x69;
+	mac_addr[4]=0x69;
+	mac_addr[5]=0x69;
+	eth_setenv_enetaddr("usbnet_devaddr", mac_addr);
 
-	//ETH MII mode...
-	/* option 1
-	writel(MII_MODE_ENABLE, &cdev->miisel);
-	cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =	PHY_INTERFACE_MODE_MII;
-	*/
-	/* option 2
-	writel((RGMII_MODE_ENABLE | RGMII_INT_DELAY), &cdev->miisel);
-	cpsw_slaves[0].phy_if = cpsw_slaves[1].phy_if =	PHY_INTERFACE_MODE_RGMII;
-	*/
-
-	rv = cpsw_register(&cpsw_data);
-	if (rv < 0)
-		printf("Error %d registering CPSW switch\n", rv);
-	else
-		n += rv;
-#endif
-
-	/*
-	 *
-	 * CPSW RGMII Internal Delay Mode is not supported in all PVT
-	 * operating points.  So we must set the TX clock delay feature
-	 * in the AR8051 PHY.  Since we only support a single ethernet
-	 * device in U-Boot, we only do this for the first instance.
-	 */
-#define AR8051_PHY_DEBUG_ADDR_REG	0x1d
-#define AR8051_PHY_DEBUG_DATA_REG	0x1e
-#define AR8051_DEBUG_RGMII_CLK_DLY_REG	0x5
-#define AR8051_RGMII_TX_CLK_DLY		0x100
-
-/* eth setup...
-	const char *devname;
-	devname = miiphy_get_current_dev();
-	miiphy_write(devname, 0x0, AR8051_PHY_DEBUG_ADDR_REG,AR8051_DEBUG_RGMII_CLK_DLY_REG);
-	miiphy_write(devname, 0x0, AR8051_PHY_DEBUG_DATA_REG,AR8051_RGMII_TX_CLK_DLY);
-*/
-#endif
-
-#if  defined(CONFIG_USB_ETHER) && \
-	(!defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_USBETH_SUPPORT))
-	if (is_valid_ether_addr(mac_addr))
-		eth_setenv_enetaddr("usbnet_devaddr", mac_addr);
+	printf("DONE\n");
 
 	rv = usb_eth_initialize(bis);
 	if (rv < 0)
