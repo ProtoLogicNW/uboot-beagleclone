@@ -267,8 +267,8 @@ void am33xx_spl_board_init(void)
 	
 
 	/* Get the max CPU frequency & set it... */
-	//dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
-	dpll_mpu_opp100.m = 500;//MPUPLL_M_500;
+	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
+	//dpll_mpu_opp100.m = 500;//MPUPLL_M_500;
 	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 
 	//set CORE to opp100
