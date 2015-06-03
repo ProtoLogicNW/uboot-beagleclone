@@ -468,8 +468,8 @@ static int omap24_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 		}
 		if (status == 0 || (status & I2C_STAT_NACK)) {
 			i2c_error = 1;
-			printf("i2c_write: error waiting for addr ACK (status=0x%x)\n",
-			       status);
+			printf("i2c_write: error waiting for addr ACK (status=0x%x, addr=0x%0x)\n",
+			       status,addr);
 			goto wr_exit;
 		}
 		if (status & I2C_STAT_XRDY) {

@@ -10,7 +10,7 @@
 
 #undef CONFIG_DRIVER_TI_CPSW
 
-#define CONFIG_ENV_IS_NOWHERE
+#undef CONFIG_ENV_IS_NOWHERE
 
 #define MACH_TYPE_TIAM335EVM		3589	/* Until the next sync */
 #define CONFIG_MACH_TYPE		MACH_TYPE_TIAM335EVM
@@ -23,9 +23,6 @@
 /* Custom script for NOR */
 #define CONFIG_SYS_LDSCRIPT		"board/ti/bonephone/u-boot.lds"
 
-/* Always 32 KiB env size */
-#define CONFIG_ENV_SIZE			(32 << 10)
-
 /* Enhance our eMMC support / experience. */
 #if 0
 #define CONFIG_CMD_GPT
@@ -35,6 +32,20 @@
 #endif
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
+
+/* 32kB to match 256kBit i2c eeprom */
+#define CONFIG_ENV_SIZE			(32 << 10)
+#define CONFIG_CMD_EEPROM
+#define CONFIG_ENV_EEPROM_IS_ON_I2C
+#define CONFIG_I2C_ENV_EEPROM_BUS 0
+#define CONFIG_SYS_I2C_EEPROM_ADDR 0x50
+#define CONFIG_SYS_DEF_EEPROM_ADDR CONFIG_SYS_I2C_EEPROM_ADDR
+#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN 2
+#define CONFIG_SYS_I2C_MULTI_EEPROMS
+
+#define CONFIG_ENV_IS_IN_EEPROM
+#define CONFIG_ENV_OFFSET	0x00 /* beginning of the EEPROM */
+
 
 #ifndef CONFIG_SPL_BUILD
 
@@ -117,12 +128,6 @@ S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 #define CONFIG_SYS_NS16550_COM5		0x481a8000	/* UART4 */
 #define CONFIG_SYS_NS16550_COM6		0x481aa000	/* UART5 */
 #define CONFIG_BAUDRATE			115200
-
-#define CONFIG_CMD_EEPROM
-#define CONFIG_ENV_EEPROM_IS_ON_I2C
-#define CONFIG_SYS_I2C_EEPROM_ADDR	0x50	/* Main EEPROM */
-#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	2
-#define CONFIG_SYS_I2C_MULTI_EEPROMS
 
 /* PMIC support */
 #define CONFIG_POWER_TPS65217
