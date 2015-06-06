@@ -33,6 +33,18 @@
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 
+#define CONFIG_ENV_IS_IN_SPI_FLASH
+#define CONFIG_CMD_SAVEENV
+/* MX25L128 config */
+#define CONFIG_ENV_SECT_SIZE		(4 << 10) /* 4 KB sectors */
+#define CONFIG_ENV_OFFSET		(576 << 10) /* 576 KiB in */
+#define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
+#define CONFIG_ENV_SPI_BUS        	0
+#define CONFIG_ENV_SPI_CS        	0
+#define CONFIG_ENV_SIZE			(64 << 10) /*64k env*/
+
+
+#if 0 /* borked at this time... takes forever to savenv and it fails to load during boot  (watchdog perhaps?) */
 /* 32kB to match 256kBit i2c eeprom */
 #define CONFIG_ENV_SIZE			(32 << 10)
 #define CONFIG_CMD_EEPROM
@@ -42,10 +54,13 @@
 #define CONFIG_SYS_DEF_EEPROM_ADDR CONFIG_SYS_I2C_EEPROM_ADDR
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN 2
 #define CONFIG_SYS_I2C_MULTI_EEPROMS
-
+/* 24LC256 config stuff */
+#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN                2
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     6
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 20
 #define CONFIG_ENV_IS_IN_EEPROM
 #define CONFIG_ENV_OFFSET	0x00 /* beginning of the EEPROM */
-
+#endif
 
 #ifndef CONFIG_SPL_BUILD
 
@@ -70,8 +85,9 @@
 #endif
 
 /* 16MB BOOT FLASH config
-S1 0x00000 - 0x1FFFF (128k) MLO (~76k currently)
-S2 0x20000 - 0xBFFFF (512k) u-boot.img 
+S1 0x00000 - 0x1FFFF (128k) MLO (~68k currently)
+S2 0x20000 - 0xBFFFF (448k) u-boot.img 
+na 0x90000 - 0x9FFFF (64k)  environment
 S3 0xA0000 - 0xAFFFF (64k) dtb (~32k currently)
 S4 not used 
 S5 0x0B0000 - 0x4AFFFF (4096k) zImage
