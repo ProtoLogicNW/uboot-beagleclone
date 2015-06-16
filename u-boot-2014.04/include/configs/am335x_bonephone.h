@@ -62,7 +62,24 @@
 #define CONFIG_ENV_OFFSET	0x00 /* beginning of the EEPROM */
 #endif
 
+/* BSD boot slooooow */
+#undef CONFIG_HW_WATCHDOG
+#undef CONFIG_OMAP_WATCHDOG
+#undef CONFIG_SPL_WATCHDOG_SUPPORT
+
 #ifndef CONFIG_SPL_BUILD
+
+/* BSD requirements */
+#ifndef CONFIG_SYS_DCACHE_OFF
+#define CONFIG_CMD_CACHE
+#endif
+
+#define CONFIG_API
+#define CONFIG_CMD_ELF
+#define CONFIG_CMD_ENV_EXISTS
+#define CONFIG_EFI_PARTITION
+#define CONFIG_PREBOOT
+#define CONFIG_SYS_MMC_MAX_DEVICE 2
 
 //Backlight PWM ... remove this
 #define PWM_TICKS	0x1388
@@ -123,6 +140,9 @@ S6 0x4B0000 - 0xFFFFFF (11584k) rootfs
 	"boot_mmc1=mmc dev 0; mmc rescan; fatload mmc :1 0x815f0000 ${dtb}; run boot_mmc1;\0"\
 	"boot_mmc2=echo Booting MMC; fatload mmc :1 0x80300000 zImage; setenv bootargs ${bootargs_mmc}; bootz 0x80300000 - 0x815f0000;\0"\
 	"beaglephone_boot=mmc dev 0; if fatload mmc :1 0x815f0000 ${dtb}; then run boot_mmc2; else run boot_spi; fi;\0"\
+	"bsdboot=mmc dev 0; mmc rescan; fatload mmc :1 ${loadaddr} ${bsdloader}; && bootelf;\0"\
+	"bsdloader=bbubldr\0"\
+	"loaderdev=disk\0"\
 	"updateprep=mmc dev 0; mmc rescan; sf probe 0;\0"\
 	"updtboot=run updateprep;fatload mmc 0 ${loadaddr} MLO.byteswap;sf update ${loadaddr} ${s1} ${filesize};fatload mmc 0 ${loadaddr} u-boot.img; sf update ${loadaddr} ${s2} ${filesize};\0"\
 	"updtimg=run updateprep;fatload mmc 0 ${loadaddr} zImage; sf update ${loadaddr} ${s5} ${filesize};fatload mmc 0 ${loadaddr} ${dtb}; sf update ${loadaddr} ${s3} ${filesize};\0"\
