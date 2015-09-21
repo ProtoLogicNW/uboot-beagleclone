@@ -44,7 +44,7 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 static int board_video_init(void);
 
 #define GPIO_LED_BLUE		GPIO_TO_PIN(2,2)
-#define GPIO_LED_ORANGE		GPIO_TO_PIN(2,3)
+#define GPIO_LED_RED		GPIO_TO_PIN(2,3)
 #define GPIO_LED_GREEN		GPIO_TO_PIN(2,4)
 
 static int set_gpio(int gpio, int state)
@@ -366,8 +366,8 @@ int board_init(void)
 	//led init...
 	printf("Setting status LEDs...\n");
 	set_gpio(GPIO_LED_BLUE, 1);
-	set_gpio(GPIO_LED_ORANGE, 1);
-	set_gpio(GPIO_LED_GREEN, 1);
+	set_gpio(GPIO_LED_RED, 1);
+//	set_gpio(GPIO_LED_GREEN, 1);
 
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
