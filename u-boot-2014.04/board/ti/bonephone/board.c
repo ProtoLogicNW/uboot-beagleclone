@@ -252,7 +252,7 @@ void am33xx_spl_board_init(void)
 {
 	int usb_cur_lim;
 
-	puts("BEAGLEPHONE R1\nPROTOLOGIC, 2014\n================\n");
+	puts("BEAGLEPHONE R1\nPROTOLOGIC, 2015\n================\n");
 	enable_i2c0_pin_mux();
 	if (i2c_probe(TPS65217_CHIP_PM))
 	{
@@ -267,8 +267,8 @@ void am33xx_spl_board_init(void)
 	
 
 	/* Get the max CPU frequency & set it... */
-	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
-	//dpll_mpu_opp100.m = 500;//MPUPLL_M_500;
+	//dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
+	dpll_mpu_opp100.m = 720;//MPUPLL_M_500;
 	do_setup_dpll(&dpll_mpu_regs, &dpll_mpu_opp100);
 
 	//set CORE to opp100
@@ -365,9 +365,9 @@ int board_init(void)
 
 	//led init...
 	printf("Setting status LEDs...\n");
-	set_gpio(GPIO_LED_BLUE, 1);
-	set_gpio(GPIO_LED_RED, 1);
-//	set_gpio(GPIO_LED_GREEN, 1);
+	set_gpio(GPIO_LED_BLUE, 0);
+	set_gpio(GPIO_LED_RED, 0);
+	set_gpio(GPIO_LED_GREEN, 1);
 
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
